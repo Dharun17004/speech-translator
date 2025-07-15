@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Translator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e0f2f7; /* Light blue background */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            width: 100%;
+            border: 1px solid #d0e7ed;
+        }
+
+        h2 {
+            color: #007bb5; /* Darker blue for heading */
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #b0d3e4;
+            border-radius: 8px;
+            box-sizing: border-box; /* Include padding in width */
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+        textarea:focus {
+            border-color: #007bb5;
+            outline: none;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #b0d3e4;
+            border-radius: 8px;
+            background-color: #fff;
+            appearance: none; /* Remove default arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292%22%20height%3D%22292%22%3E%3Cpath%20fill%3D%22%23007bb5%22%20d%3D%22M287%2C114L146%2C255L5%2C114L50%2C69L146%2C165L242%2C69L287%2C114z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+            cursor: pointer;
+        }
+        select:focus {
+            border-color: #007bb5;
+            outline: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+            accent-color: #007bb5; /* Custom color for checkbox */
+        }
+        .checkbox-group label {
+            margin-bottom: 0;
+        }
+
+        button[type="submit"] {
+            padding: 12px 25px;
+            background-color: #28a745; /* Green translate button */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            width: auto;
+            display: block; /* Make button full width if not flex */
+            margin-left: auto; /* Push to right */
+        }
+        button[type="submit"]:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        button[type="submit"]:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: translateY(0);
+        }
+
+        .output-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        h3 {
+            color: #007bb5;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .translation-display {
+            background-color: #f5fafd; /* Lighter blue for output */
+            padding: 18px;
+            border-radius: 8px;
+            border: 1px solid #d0e7ed;
+            min-height: 80px;
+            word-wrap: break-word;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .original-text-display {
+            font-style: italic;
+            color: #777;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .translated-text-output {
+            font-weight: 500;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        #audioPlayer {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .status-message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        .status-message.info { color: #007bb5; }
+        .status-message.error { color: #dc3545; }
+
+        .loading-spinner {
+            display: none; /* Hidden by default */
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #007bb5;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🌍 Real-Time Speech Translator</h2>
+
+        <form id="translateForm">
+            <div class="form-group">
+                <label for="text">Enter text to translate:</label>
+                <textarea name="text" id="text" rows="4" placeholder="Type something..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="src_lang">From:</label>
+                <select name="src_lang" id="src_lang">
+                    {% for code, name in languages %}
+                        <option value="{{ code }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dest_lang">To:</label>
+                <select name="dest_lang" id="dest_lang">
+                    {% for code, name in languages %}
+                        <option value="{{ code }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" name="speak_output" id="speak_output" checked>
+                <label for="speak_output">Speak Output</label>
+            </div>
+
+            <button type="submit" id="translateBtn">Translate</button>
+        </form>
+
+        <div id="loadingSpinner" class="loading-spinner"></div>
+        <p id="statusMessage" class="status-message info"></p>
+
+        <div class="output-section">
+            <h3>Translation Output:</h3>
+            <p id="originalDisplayText" class="original-text-display"></p>
+            <div id="translatedOutputDisplay" class="translation-display">Your translated text will appear here.</div>
+            <audio id="audioPlayer" controls hidden></audio>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('translateForm');
+        const textInput = document.getElementById('text');
+        const srcLangSelect = document.getElementById('src_lang');
+        const destLangSelect = document.getElementById('dest_lang');
+        const speakOutputCheckbox = document.getElementById('speak_output');
+        const translateBtn = document.getElementById('translateBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const statusMessage = document.getElementById('statusMessage');
+        const originalDisplayText = document.getElementById('originalDisplayText');
+        const translatedOutputDisplay = document.getElementById('translatedOutputDisplay');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // Set default language selections (optional, Flask could do this too)
+        document.addEventListener('DOMContentLoaded', () => {
+            srcLangSelect.value = 'en'; // Default English
+            destLangSelect.value = 'ta'; // Default Tamil (as seen in your screenshot)
+        });
+
+        // Function to display status messages
+        function displayStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission and page reload
+
+            const inputText = textInput.value;
+            const srcLang = srcLangSelect.value;
+            const destLang = destLangSelect.value;
+            const speakOutput = speakOutputCheckbox.checked;
+
+            // Reset previous outputs and status
+            originalDisplayText.textContent = '';
+            translatedOutputDisplay.textContent = '';
+            audioPlayer.src = '';
+            audioPlayer.hidden = true;
+            displayStatus(''); // Clear previous status
+
+            if (!inputText.trim()) {
+                displayStatus('Please enter some text to translate.', 'error');
+                return;
+            }
+
+            // Show loading state
+            translateBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            displayStatus('Translating...', 'info');
+
+            try {
+                const response = await fetch('/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: inputText,
+                        src_lang: srcLang,
+                        dest_lang: destLang,
+                        speak_output: speakOutput
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) { // Check if HTTP status is 2xx
+                    originalDisplayText.textContent = `Original (${data.src_lang_name}): ${data.original_text}`;
+                    translatedOutputDisplay.textContent = `Translated (${data.dest_lang_name}): ${data.translated_text}`;
+
+                    if (data.audio_url) {
+                        audioPlayer.src = data.audio_url;
+                        audioPlayer.hidden = false;
+                        audioPlayer.play().catch(err => {
+                            console.error("Audio playback error:", err);
+                            displayStatus("Audio playback blocked by browser (e.g., auto-play policy).", "error");
+                        });
+                    }
+                    displayStatus('Translation successful!', 'info');
+                } else {
+                    // Handle server errors (e.g., 500)
+                    const errorText = data.translated_text || 'Server error during translation.';
+                    displayStatus(`Error: ${errorText}`, 'error');
+                    translatedOutputDisplay.textContent = `Error: ${errorText}`;
+                }
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                displayStatus('Network error or server unreachable. Please check your connection.', 'error');
+                translatedOutputDisplay.textContent = 'Translation failed due to network error.';
+            } finally {
+                // Hide loading state
+                translateBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
