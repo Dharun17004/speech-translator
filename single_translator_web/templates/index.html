@@ -3,331 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speech Translator</title>
+    <title>Dynamic Speech Translator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
-
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #e0f2f7; /* Light blue background */
+            background-color: #e0f2f7;
             color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-
+        .dark {
+            background-color: #121212;
+            color: #eee;
+        }
         .container {
             background-color: #ffffff;
             padding: 35px;
             border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            max-width: 700px;
+            max-width: 800px;
             width: 100%;
             border: 1px solid #d0e7ed;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+            transition: background-color 0.3s ease, border 0.3s ease;
         }
-
-        h2 {
-            color: #007bb5; /* Darker blue for heading */
+        body.dark .container {
+            background-color: #1e1e1e;
+            border-color: #333;
+        }
+        h1 {
+            color: #004d7a;
             text-align: center;
-            margin-bottom: 30px;
-            font-weight: 700;
+            font-size: 2.2em;
         }
-
-        .form-group {
-            margin-bottom: 20px;
+        body.dark h1 {
+            color: #90caf9;
         }
-
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
         }
-
-        textarea {
-            width: 100%;
-            padding: 12px;
-            font-size: 1rem;
-            border: 1px solid #b0d3e4;
-            border-radius: 8px;
-            box-sizing: border-box; /* Include padding in width */
-            resize: vertical;
-            min-height: 100px;
-            transition: border-color 0.3s ease;
-        }
-        textarea:focus {
-            border-color: #007bb5;
-            outline: none;
-        }
-
-        select {
+        textarea, select, input[type=range] {
             width: 100%;
             padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #b0d3e4;
-            border-radius: 8px;
-            background-color: #fff;
-            appearance: none; /* Remove default arrow */
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292%22%20height%3D%22292%22%3E%3Cpath%20fill%3D%22%23007bb5%22%20d%3D%22M287%2C114L146%2C255L5%2C114L50%2C69L146%2C165L242%2C69L287%2C114z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 12px;
-            cursor: pointer;
+            font-size: 1em;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background-color: #f9fcff;
         }
-        select:focus {
-            border-color: #007bb5;
-            outline: none;
+        body.dark textarea,
+        body.dark select,
+        body.dark input[type=range] {
+            background-color: #2a2a2a;
+            color: #eee;
+            border-color: #444;
         }
-
-        .checkbox-group {
+        .btn-group {
             display: flex;
-            align-items: center;
-            margin-top: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .checkbox-group input[type="checkbox"] {
-            margin-right: 8px;
-            transform: scale(1.2);
-            accent-color: #007bb5; /* Custom color for checkbox */
-        }
-        .checkbox-group label {
-            margin-bottom: 0;
-        }
-
-        button[type="submit"] {
-            padding: 12px 25px;
-            background-color: #28a745; /* Green translate button */
-            color: white;
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            width: auto;
-            display: block; /* Make button full width if not flex */
-            margin-left: auto; /* Push to right */
+            transition: background-color 0.3s, transform 0.2s;
         }
-        button[type="submit"]:hover {
-            background-color: #218838;
-            transform: translateY(-1px);
+        button.primary {
+            background-color: #007bb5;
+            color: white;
         }
-        button[type="submit"]:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: translateY(0);
+        button.secondary {
+            background-color: #6c757d;
+            color: white;
         }
-
+        button.accent {
+            background-color: #28a745;
+            color: white;
+        }
+        button:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        #themeToggleBtn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.3em;
+        }
         .output-section {
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid #e0e0e0;
+            background-color: #e9f5f9;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 120px;
+            position: relative;
+            transition: background-color 0.3s ease;
         }
-
-        h3 {
-            color: #007bb5;
-            margin-bottom: 15px;
-            text-align: center;
+        body.dark .output-section {
+            background-color: #2a2a2a;
         }
-
-        .translation-display {
-            background-color: #f5fafd; /* Lighter blue for output */
-            padding: 18px;
+        .fade {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .output-text {
+            font-size: 1.2em;
+        }
+        .history-section {
+            background-color: #f1f1f1;
+            padding: 10px;
             border-radius: 8px;
-            border: 1px solid #d0e7ed;
-            min-height: 80px;
-            word-wrap: break-word;
-            line-height: 1.6;
-            margin-bottom: 15px;
+            max-height: 100px;
+            overflow-y: auto;
         }
-        .original-text-display {
-            font-style: italic;
-            color: #777;
-            margin-bottom: 10px;
-            font-size: 0.9em;
-            text-align: center;
+        body.dark .history-section {
+            background-color: #1e1e1e;
         }
-        .translated-text-output {
-            font-weight: 500;
-            color: #333;
-            font-size: 1.1em;
+        .history-item {
+            cursor: pointer;
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
         }
-
-        #audioPlayer {
-            width: 100%;
-            margin-top: 15px;
+        .history-item:hover {
+            background-color: #e0f2f7;
         }
-
-        .status-message {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: 500;
-        }
-        .status-message.info { color: #007bb5; }
-        .status-message.error { color: #dc3545; }
-
-        .loading-spinner {
-            display: none; /* Hidden by default */
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #007bb5;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        body.dark .history-item:hover {
+            background-color: #333;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🌍 Real-Time Speech Translator</h2>
+        <button id="themeToggleBtn" class="icon-button" title="Toggle Theme">&#9790;</button>
+        <h1>🌐 Dynamic Speech Translator</h1>
 
-        <form id="translateForm">
-            <div class="form-group">
-                <label for="text">Enter text to translate:</label>
-                <textarea name="text" id="text" rows="4" placeholder="Type something..."></textarea>
-            </div>
+        <label for="inputText">Enter Text:</label>
+        <textarea id="inputText" placeholder="Type something..."></textarea>
 
-            <div class="form-group">
-                <label for="src_lang">From:</label>
-                <select name="src_lang" id="src_lang">
-                    {% for code, name in languages %}
-                        <option value="{{ code }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="btn-group">
+            <button id="voiceInputBtn" class="secondary">🎤 Voice Input</button>
+            <button id="clearBtn" class="secondary">🧹 Clear</button>
+        </div>
 
-            <div class="form-group">
-                <label for="dest_lang">To:</label>
-                <select name="dest_lang" id="dest_lang">
-                    {% for code, name in languages %}
-                        <option value="{{ code }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <label for="sourceLang">From:</label>
+        <select id="sourceLang"></select>
 
-            <div class="checkbox-group">
-                <input type="checkbox" name="speak_output" id="speak_output" checked>
-                <label for="speak_output">Speak Output</label>
-            </div>
+        <label for="targetLang">To:</label>
+        <select id="targetLang"></select>
 
-            <button type="submit" id="translateBtn">Translate</button>
-        </form>
+        <label for="speechSpeed">Speech Speed (0.5x - 1.5x):</label>
+        <input type="range" id="speechSpeed" min="0.5" max="1.5" step="0.1" value="1">
 
-        <div id="loadingSpinner" class="loading-spinner"></div>
-        <p id="statusMessage" class="status-message info"></p>
+        <div class="btn-group">
+            <button id="translateBtn" class="primary">Translate</button>
+            <button id="downloadBtn" class="accent">⬇️ Download MP3</button>
+            <button id="copyBtn" class="secondary">📋 Copy</button>
+        </div>
 
-        <div class="output-section">
-            <h3>Translation Output:</h3>
-            <p id="originalDisplayText" class="original-text-display"></p>
-            <div id="translatedOutputDisplay" class="translation-display">Your translated text will appear here.</div>
+        <div class="output-section fade">
+            <div id="translatedOutput" class="output-text">Your translation will appear here.</div>
             <audio id="audioPlayer" controls hidden></audio>
         </div>
+
+        <h3>Translation History</h3>
+        <div id="translationHistory" class="history-section"></div>
     </div>
 
     <script>
-        const form = document.getElementById('translateForm');
-        const textInput = document.getElementById('text');
-        const srcLangSelect = document.getElementById('src_lang');
-        const destLangSelect = document.getElementById('dest_lang');
-        const speakOutputCheckbox = document.getElementById('speak_output');
-        const translateBtn = document.getElementById('translateBtn');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const statusMessage = document.getElementById('statusMessage');
-        const originalDisplayText = document.getElementById('originalDisplayText');
-        const translatedOutputDisplay = document.getElementById('translatedOutputDisplay');
-        const audioPlayer = document.getElementById('audioPlayer');
-
-        // Set default language selections (optional, Flask could do this too)
-        document.addEventListener('DOMContentLoaded', () => {
-            srcLangSelect.value = 'en'; // Default English
-            destLangSelect.value = 'ta'; // Default Tamil (as seen in your screenshot)
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+        window.addEventListener('load', () => {
+            if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
         });
 
-        // Function to display status messages
-        function displayStatus(message, type = 'info') {
-            statusMessage.textContent = message;
-            statusMessage.className = `status-message ${type}`;
+        const langs = {
+            "af": "Afrikaans", "sq": "Albanian", "am": "Amharic", "ar": "Arabic", "hy": "Armenian", "az": "Azerbaijani", "eu": "Basque", "be": "Belarusian", "bn": "Bengali", "bs": "Bosnian", "bg": "Bulgarian", "ca": "Catalan", "ceb": "Cebuano", "ny": "Chichewa", "zh-cn": "Chinese (Simplified)", "zh-tw": "Chinese (Traditional)", "co": "Corsican", "hr": "Croatian", "cs": "Czech", "da": "Danish", "nl": "Dutch", "en": "English", "eo": "Esperanto", "et": "Estonian", "tl": "Filipino", "fi": "Finnish", "fr": "French", "fy": "Frisian", "gl": "Galician", "ka": "Georgian", "de": "German", "el": "Greek", "gu": "Gujarati", "ht": "Haitian Creole", "ha": "Hausa", "haw": "Hawaiian", "iw": "Hebrew", "hi": "Hindi", "hmn": "Hmong", "hu": "Hungarian", "is": "Icelandic", "ig": "Igbo", "id": "Indonesian", "ga": "Irish", "it": "Italian", "ja": "Japanese", "jw": "Javanese", "kn": "Kannada", "kk": "Kazakh", "km": "Khmer", "ko": "Korean", "ku": "Kurdish (Kurmanji)", "ky": "Kyrgyz", "lo": "Lao", "la": "Latin", "lv": "Latvian", "lt": "Lithuanian", "lb": "Luxembourgish", "mk": "Macedonian", "mg": "Malagasy", "ms": "Malay", "ml": "Malayalam", "mt": "Maltese", "mi": "Maori", "mr": "Marathi", "mn": "Mongolian", "my": "Myanmar (Burmese)", "ne": "Nepali", "no": "Norwegian", "ps": "Pashto", "fa": "Persian", "pl": "Polish", "pt": "Portuguese", "pa": "Punjabi", "ro": "Romanian", "ru": "Russian", "sm": "Samoan", "gd": "Scots Gaelic", "sr": "Serbian", "st": "Sesotho", "sn": "Shona", "sd": "Sindhi", "si": "Sinhala", "sk": "Slovak", "sl": "Slovenian", "so": "Somali", "es": "Spanish", "su": "Sundanese", "sw": "Swahili", "sv": "Swedish", "tg": "Tajik", "ta": "Tamil", "te": "Telugu", "th": "Thai", "tr": "Turkish", "uk": "Ukrainian", "ur": "Urdu", "uz": "Uzbek", "vi": "Vietnamese", "cy": "Welsh", "xh": "Xhosa", "yi": "Yiddish", "yo": "Yoruba", "zu": "Zulu"
+        };
+
+        const sourceLang = document.getElementById('sourceLang');
+        const targetLang = document.getElementById('targetLang');
+        for (let [code, name] of Object.entries(langs)) {
+            sourceLang.innerHTML += `<option value="${code}">${name}</option>`;
+            targetLang.innerHTML += `<option value="${code}">${name}</option>`;
+        }
+        sourceLang.value = 'en';
+        targetLang.value = 'ta';
+
+        const translateBtn = document.getElementById('translateBtn');
+        const inputText = document.getElementById('inputText');
+        const translatedOutput = document.getElementById('translatedOutput');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const speechSpeed = document.getElementById('speechSpeed');
+        const historyDiv = document.getElementById('translationHistory');
+
+        function addToHistory(text, translation) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerText = `${text} → ${translation}`;
+            item.onclick = () => inputText.value = text;
+            historyDiv.prepend(item);
         }
 
-        // Handle form submission
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission and page reload
+        translateBtn.onclick = async () => {
+    const text = inputText.value.trim();
+    if (!text) return;
 
-            const inputText = textInput.value;
-            const srcLang = srcLangSelect.value;
-            const destLang = destLangSelect.value;
-            const speakOutput = speakOutputCheckbox.checked;
+    const srcLang = sourceLang.value;
+    const destLang = targetLang.value;
+    const speed = parseFloat(speechSpeed.value);
+    const speakOutput = true;
 
-            // Reset previous outputs and status
-            originalDisplayText.textContent = '';
-            translatedOutputDisplay.textContent = '';
-            audioPlayer.src = '';
-            audioPlayer.hidden = true;
-            displayStatus(''); // Clear previous status
+    translatedOutput.textContent = 'Translating...';
+    audioPlayer.hidden = true;
 
-            if (!inputText.trim()) {
-                displayStatus('Please enter some text to translate.', 'error');
-                return;
-            }
-
-            // Show loading state
-            translateBtn.disabled = true;
-            loadingSpinner.style.display = 'block';
-            displayStatus('Translating...', 'info');
-
-            try {
-                const response = await fetch('/translate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: inputText,
-                        src_lang: srcLang,
-                        dest_lang: destLang,
-                        speak_output: speakOutput
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) { // Check if HTTP status is 2xx
-                    originalDisplayText.textContent = `Original (${data.src_lang_name}): ${data.original_text}`;
-                    translatedOutputDisplay.textContent = `Translated (${data.dest_lang_name}): ${data.translated_text}`;
-
-                    if (data.audio_url) {
-                        audioPlayer.src = data.audio_url;
-                        audioPlayer.hidden = false;
-                        audioPlayer.play().catch(err => {
-                            console.error("Audio playback error:", err);
-                            displayStatus("Audio playback blocked by browser (e.g., auto-play policy).", "error");
-                        });
-                    }
-                    displayStatus('Translation successful!', 'info');
-                } else {
-                    // Handle server errors (e.g., 500)
-                    const errorText = data.translated_text || 'Server error during translation.';
-                    displayStatus(`Error: ${errorText}`, 'error');
-                    translatedOutputDisplay.textContent = `Error: ${errorText}`;
-                }
-
-            } catch (error) {
-                console.error('Fetch error:', error);
-                displayStatus('Network error or server unreachable. Please check your connection.', 'error');
-                translatedOutputDisplay.textContent = 'Translation failed due to network error.';
-            } finally {
-                // Hide loading state
-                translateBtn.disabled = false;
-                loadingSpinner.style.display = 'none';
-            }
+    try {
+        const response = await fetch('/translate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text,
+                src_lang: srcLang,
+                dest_lang: destLang,
+                speak_output: speakOutput,
+                slow_speech: speed <= 0.8
+            }),
         });
+
+        const data = await response.json();
+        translatedOutput.textContent = data.translated_text;
+        if (data.audio_url) {
+            audioPlayer.src = data.audio_url;
+            audioPlayer.hidden = false;
+        }
+
+        addToHistory(data.original_text, data.translated_text);
+    } catch (error) {
+        translatedOutput.textContent = '❌ Translation failed. Please try again.';
+        console.error(error);
+    }
+};
+
+        document.getElementById('copyBtn').onclick = () => {
+            navigator.clipboard.writeText(translatedOutput.textContent).then(() => {
+                alert('Copied to clipboard!');
+            });
+        };
+
+        document.getElementById('clearBtn').onclick = () => {
+            inputText.value = '';
+            translatedOutput.textContent = 'Your translation will appear here.';
+            audioPlayer.hidden = true;
+        };
+
+        document.getElementById('downloadBtn').onclick = () => {
+            const a = document.createElement('a');
+            a.href = audioPlayer.src;
+            a.download = 'translation.mp3';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
     </script>
 </body>
 </html>
